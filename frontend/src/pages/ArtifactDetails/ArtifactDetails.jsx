@@ -10,13 +10,14 @@ import { Category, Diversity3, LocalOffer } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import DownloadArtifactButton from "./components/DownloadArtifactButton";
 import ModelVisualization from "./components/ModelVisualization";
-import ImagesCarousel from "./components/ImagesCarousel";
+import ImageVisualization from "./components/ImageVisualization";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import DownloadArtifactForm from "./components/DownloadArtifactForm";
 import NotFound from "../../components/NotFound";
 import { API_URLS } from "../../api";
 import { useToken } from "../../hooks/useToken";
 import { useSnackBars } from "../../hooks/useSnackbars";
+import Carousel from "./components/Carousel";
 
 /**
  * The ArtifactDetails component displays detailed information about a specific artifact,
@@ -48,6 +49,10 @@ const ArtifactDetails = () => {
     },
     images: [],
   });
+  const [selectedVisualization, setSelectedVisualization] = useState({
+    type: "",
+    index: 0,
+  })
 
   /**
    * Redirects the user to the edit page of the current artifact.
@@ -79,8 +84,23 @@ const ArtifactDetails = () => {
       })
       .then((response) => {
         setArtifact(response);
+        if (response.model.object !== "") {
+          setSelectedVisualization({
+            type: "model",
+            index: -1
+          })
+          console.log("model visualization")
+        } else {
+          setSelectedVisualization({
+            type: "image",
+            index: 0
+          })
+          console.log("image visualization")
+        }
       })
-      .finally(() => setLoading(false));
+      .finally(() =>{
+        setLoading(false)
+      });
   }, [artifactId, token]);
 
   /**
@@ -131,6 +151,21 @@ const ArtifactDetails = () => {
     }
   };
 
+
+  const handleVisualization = (index) => {
+    if (index === -1) {
+      setSelectedVisualization({
+        type: "model",
+        index: -1
+      })
+    } else {
+      setSelectedVisualization({
+        type: "image",
+        index: index
+      })
+    }
+  }
+
   return (
     <>
       {notFound ? (
@@ -165,19 +200,25 @@ const ArtifactDetails = () => {
               )}
             </CustomContainer>
             {/* Loading indicator while model is being loaded */}
-            {!artifact.model.object || !artifact.model.material ? (
+            {loading ? (
               <CustomDiv>
                 <CircularProgress color="primary" />
               </CustomDiv>
             ) : (
+              <>
+              {selectedVisualization.type === "image" ? (
+                <ImageVisualization imagePath={artifact.images[selectedVisualization.index]} />
+              ) : (
               // Renders 3D model visualization if object and material paths are available
               <ModelVisualization
                 objPath={artifact.model.object}
                 mtlPath={artifact.model.material}
               />
+              )}
+              </>
             )}
             {/* Image carousel for displaying artifact images */}
-            <ImagesCarousel images={artifact.images} />
+            <Carousel images={artifact.images} thumbnail={artifact.thumbnail} modelExists={!!artifact.model.object} selectVisualization={handleVisualization} />
           </LeftBox>
           {/* RightBox: Contains artifact description, tags, and attributes */}
           <RightBox>

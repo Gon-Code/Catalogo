@@ -45,7 +45,7 @@ class Command(BaseCommand):
             logger.error(f"File {file} not found. Stop")
             return
 
-        with open(file, "r") as textshape:
+        with open(file, "r", encoding="utf-8") as textshape:
             artifact_ids = textshape.readlines()
 
         shape_artifact_relationships = [line.strip() for line in artifact_ids]

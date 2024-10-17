@@ -584,9 +584,11 @@ class ArtifactCreateUpdateAPIView(generics.GenericAPIView):
 
         # Handle model files
         # New files
+        # check if model files are sent in the request
         new_texture_file = files.get("model[new_texture]")
         new_object_file = files.get("model[new_object]")
         new_material_file = files.get("model[new_material]")
+        print(new_texture_file, new_object_file, new_material_file)
 
         new_texture_instance, new_object_instance, new_material_instance = (
             None,
@@ -605,29 +607,34 @@ class ArtifactCreateUpdateAPIView(generics.GenericAPIView):
 
         # Update Model instance
         # It allows to create a new model with only the new files
-        model, created = Model.objects.get_or_create(
-            texture=(
-                new_texture_instance
-                if new_texture_instance
-                else instance.id_model.texture
-            ),
-            object=(
-                new_object_instance if new_object_instance else instance.id_model.object
-            ),
-            material=(
-                new_material_instance
-                if new_material_instance
-                else instance.id_model.material
-            ),
-        )
-        if created:
-            logger.info(
-                f"Model created: {model.texture}, {model.object}, {model.material}"
-            )
+        if not new_texture_instance and not new_object_instance and not new_material_instance:
+            model = None
         else:
-            logger.info(
-                f"Model updated: {model.texture}, {model.object}, {model.material}"
+            model, created = Model.objects.get_or_create(
+                texture=(
+                    new_texture_instance
+                    if new_texture_instance
+                    else None if not instance.id_model else instance.id_model.texture
+                ),
+                object=(
+                    new_object_instance 
+                    if new_object_instance 
+                    else None if not instance.id_model else instance.id_model.object
+                ),
+                material=(
+                    new_material_instance
+                    if new_material_instance
+                    else None if not instance.id_model else instance.id_model.material
+                ),
             )
+            if created:
+                logger.info(
+                    f"Model created: {model.texture}, {model.object}, {model.material}"
+                )
+            else:
+                logger.info(
+                    f"Model updated: {model.texture}, {model.object}, {model.material}"
+                )
         # Set the model
         instance.id_model = model
 

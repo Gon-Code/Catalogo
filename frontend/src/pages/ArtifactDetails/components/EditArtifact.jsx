@@ -59,6 +59,18 @@ const EditArtifact = () => {
   const [shapeOptions, setShapeOptions] = useState([]); // State for storing shape options
   const [cultureOptions, setCultureOptions] = useState([]); // State for storing culture options
   const [tagOptions, setTagOptions] = useState([]); // State for storing tag options
+  
+  // require all model 3d data if you put one of them
+  const [requiredModelData, setRequiredModelData] = useState(false);
+
+  useEffect(() => {
+    if (updatedArtifact.object || updatedArtifact.texture || updatedArtifact.material) {
+      setRequiredModelData(true);
+    } else {
+      setRequiredModelData(false);
+    }
+  }, [updatedArtifact.object, updatedArtifact.texture, updatedArtifact.material]);
+
 
   // Fetch artifact data from the API
   useEffect(() => {
@@ -127,6 +139,18 @@ const EditArtifact = () => {
   // Handles form submission for updating artifact
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (requiredModelData){
+      if (!updatedArtifact.object || !updatedArtifact.texture || !updatedArtifact.material) {
+        addAlert("Por favor, sube los archivos necesarios para el modelo 3D.");
+        return;
+      }
+    } else {
+      if (updatedArtifact.images.length === 0) {
+        addAlert("Por favor, sube al menos una imagen del objeto.");
+        return;
+      }
+    }
 
     const formData = new FormData();
 
@@ -223,27 +247,27 @@ const EditArtifact = () => {
                 {/* Column for file uploads and image upload */}
                 <ColumnGrid item xs={6} rowGap={2}>
                   <UploadButton
-                    label="Objeto *"
+                    label={requiredModelData ? "Objeto *" : "Objeto"}
                     name="object"
-                    isRequired
+                    isRequired={requiredModelData}
                     setStateFn={setUpdatedArtifact}
                     initialFilename={getFileNameOrUrl(
                       updatedArtifact.object
                     )}
                   />
                   <UploadButton
-                    label="Textura *"
+                    label={requiredModelData ? "Textura *" : "Textura"}
                     name="texture"
-                    isRequired
+                    isRequired={requiredModelData}
                     setStateFn={setUpdatedArtifact}
                     initialFilename={getFileNameOrUrl(
                       updatedArtifact.texture
                     )}
                   />
                   <UploadButton
-                    label="Material *"
+                    label={requiredModelData ? "Material *" : "Material"}
                     name="material"
-                    isRequired
+                    isRequired={requiredModelData}
                     setStateFn={setUpdatedArtifact}
                     initialFilename={getFileNameOrUrl(
                       updatedArtifact.material

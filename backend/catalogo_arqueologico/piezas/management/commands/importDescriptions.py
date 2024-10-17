@@ -78,7 +78,7 @@ class Command(BaseCommand):
             logger.error(f"File {descriptions_file} not found. Stop")
             return
 
-        with open(descriptions_file, newline="") as archivo_csv:
+        with open(descriptions_file, newline="", encoding="utf-8") as archivo_csv:
             artifact_description_relationships = csv.reader(archivo_csv, delimiter=",")
             for artifact_description_tuple in artifact_description_relationships:
                 realId = artifact_description_tuple[0]

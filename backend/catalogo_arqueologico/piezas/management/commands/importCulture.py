@@ -36,7 +36,7 @@ class Command(BaseCommand):
 
         culture_artifactIds = {}
 
-        with open(file, newline="") as archivo_csv:
+        with open(file, newline="", encoding="utf-8") as archivo_csv:
             artifact_culture_relationships = csv.reader(archivo_csv, delimiter=",")
             # Fill the dictionary with the cultures and the artifacts that have that culture
             for artifact_culture_tuple in artifact_culture_relationships:

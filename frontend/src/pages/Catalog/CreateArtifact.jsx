@@ -57,6 +57,19 @@ const CreateArtifact = () => {
   const [cultureOptions, setCultureOptions] = useState([]);
   const [tagOptions, setTagOptions] = useState([]);
 
+  //model is required
+  const [modelRequired, setModelRequired] = useState(false);
+
+  useEffect(() => {
+    if (newObjectAttributes.object instanceof File ||
+      newObjectAttributes.texture instanceof File ||
+      newObjectAttributes.material instanceof File) {
+      setModelRequired(true);
+    } else {
+      setModelRequired(false);
+    }
+  }, [newObjectAttributes.object, newObjectAttributes.texture, newObjectAttributes.material]);
+
   // Fetch data from the API
   useEffect(() => {
     fetch(API_URLS.ALL_METADATA, {
@@ -91,8 +104,27 @@ const CreateArtifact = () => {
     setNewObjectAttributes({ ...newObjectAttributes, [name]: value });
   };
 
+  const isEmptyObject = (obj) => {
+    return Object.keys(obj).length === 0;
+  };
+  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (modelRequired) {
+      if (
+        !(newObjectAttributes.object instanceof File) ||
+        !(newObjectAttributes.texture instanceof File) ||
+        !(newObjectAttributes.material instanceof File)
+      ) {
+        addAlert("Para subir un objeto 3d, se deben subir los tres archivos requeridos");
+        return;
+      }
+    } else if (newObjectAttributes.images.length === 0) {
+      addAlert("Si no se sube un modelo 3d, se deben subir imágenes");
+      return;
+    }
+
     const formData = new FormData();
     formData.append(`model[new_object]`, newObjectAttributes.object);
     formData.append(`model[new_texture]`, newObjectAttributes.texture);
@@ -145,21 +177,21 @@ const CreateArtifact = () => {
           <Grid container spacing={2}>
             <ColumnGrid item xs={6} rowGap={2}>
               <UploadButton
-                label="Objeto *"
+                label={modelRequired ? "Objeto *" : "Objeto"}
                 name="object"
-                isRequired
+                isRequired={modelRequired}
                 setStateFn={setNewObjectAttributes}
               />
               <UploadButton
-                label="Textura *"
+                label={modelRequired ? "Textura *" : "Textura"}
                 name="texture"
-                isRequired
+                isRequired={modelRequired}
                 setStateFn={setNewObjectAttributes}
               />
               <UploadButton
-                label="Material *"
+                label={modelRequired ? "Material *" : "Material"}
                 name="material"
-                isRequired
+                isRequired={modelRequired}
                 setStateFn={setNewObjectAttributes}
               />
               <UploadButton

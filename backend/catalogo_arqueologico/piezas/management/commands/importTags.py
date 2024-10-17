@@ -38,7 +38,7 @@ class Command(BaseCommand):
 
         tag_artifactIds = {}
 
-        with open(file, newline="") as archivo_csv:
+        with open(file, newline="", encoding="utf-8") as archivo_csv:
             artifact_tags_relationships = csv.reader(archivo_csv, delimiter=",")
             # Fill the dictionary with the tags and the artifacts that have that tag
             for artifact_tags_tuple in artifact_tags_relationships:
